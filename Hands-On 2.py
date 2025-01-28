@@ -1,5 +1,7 @@
-import random
 import time
+import random
+import platform
+import psutil
 
 def insertion_sort(arr):
     for i in range(1, len(arr)):
@@ -32,22 +34,34 @@ def bubble_sort(arr):
             break
     return arr
 
-def benchmark_sorting_algorithm(sort_function, arr_sizes):
-    times = []
-    for size in arr_sizes:
-        arr = random.sample(range(size * 10), size)
-        start_time = time.time()
-        sort_function(arr)
-        end_time = time.time()
-        times.append(end_time - start_time)
-    return times
+def benchmark_sorting_algorithms():
+    algorithms = {
+        "Insertion Sort": insertion_sort,
+        "Selection Sort": selection_sort,
+        "Bubble Sort": bubble_sort,
+    }
 
-arr_sizes = [5, 10, 20, 50, 100, 200, 500, 1000]
+    input_sizes = [5, 10, 20, 50, 100, 200, 500, 1000, 2000]
+    results = {alg: [] for alg in algorithms}
 
-insertion_times = benchmark_sorting_algorithm(insertion_sort, arr_sizes)
-selection_times = benchmark_sorting_algorithm(selection_sort, arr_sizes)
-bubble_times = benchmark_sorting_algorithm(bubble_sort, arr_sizes)
+    for size in input_sizes:
+        arr = random.sample(range(size * 10), size)  
+        for alg_name, alg_func in algorithms.items():
+            arr_copy = arr.copy()  
+            start_time = time.time()
+            alg_func(arr_copy)
+            end_time = time.time()
+            results[alg_name].append(end_time - start_time)
 
-print("Array Size | Insertion Sort Time (seconds) | Selection Sort Time (seconds) | Bubble Sort Time (seconds)")
-for i, size in enumerate(arr_sizes):
-    print(f"{size:10} | {insertion_times[i]:.6f} | {selection_times[i]:.6f} | {bubble_times[i]:.6f}")
+    print("System Information:")
+    print(f"CPU: {platform.processor()}")
+    print(f"RAM: {psutil.virtual_memory().total / 1e9:.2f} GB")
+    print("\nBenchmark Results (time in seconds):")
+    print("Input Size | " + " | ".join(algorithms.keys()))
+    print("-" * (12 + 20 * len(algorithms)))
+
+    for i, size in enumerate(input_sizes):
+        row = f"{size:<10} | " + " | ".join(f"{results[alg][i]:<15.6f}" for alg in algorithms)
+        print(row)
+
+benchmark_sorting_algorithms()
